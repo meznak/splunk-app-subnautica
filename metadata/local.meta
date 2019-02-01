@@ -1,7 +1,0 @@
-[]
-access = read : [ * ], write : [ admin ]
-export = system
-
-[props/subnautica]
-version = 7.2.3
-modtime = 1547539125.070752000
