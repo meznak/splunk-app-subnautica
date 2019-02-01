@@ -1,0 +1,125 @@
+<form theme="dark">
+  <label>Subnautica stats</label>
+  <search id="basesearch">
+    <query>`subnautica_events`
+| table _time host resource max_depth distance time_played</query>
+    <earliest>$field1.earliest$</earliest>
+    <latest>$field1.latest$</latest>
+    <refresh>10m</refresh>
+    <refreshType>delay</refreshType>
+  </search>
+  <fieldset submitButton="false">
+    <input type="time" token="field1">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <chart>
+        <title>Resources collected</title>
+        <search>
+          <query> `subnautica_events` resource=* earliest=0
+| timechart limit=0 useother=false count by resource</query>
+          <earliest>0</earliest>
+          <refresh>10m</refresh>
+          <refreshType>delay</refreshType>
+        </search>
+        <option name="charting.chart">column</option>
+	<option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Resources collected by host</title>
+        <search base="basesearch">
+          <query>search resource=*
+| eval foo=mvzip(host, resource)
+| timechart limit=0 useother=false count by foo</query>
+        </search>
+        <option name="charting.chart">column</option>
+	<option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Resources collected - All time</title>
+        <search base="basesearch">
+          <query> search resource=*
+| chart limit=20 count by resource
+| where count &gt; 1
+| sort - count</query>
+        </search>
+        <option name="charting.axisY.scale">linear</option>
+	<option name="height">350</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.placement">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Maximum depth</title>
+        <search base="basesearch">
+          <query> search max_depth=*
+| timechart max(max_depth) by host</query>
+        </search>
+        <option name="charting.chart">line</option>
+	<option name="charting.axisTitleX.visibility">collapsed</option>
+	<option name="charting.axisTitleY.text">meters</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Distance traveled</title>
+        <search base="basesearch">
+          <query>search distance=*
+| sort _time
+| streamstats sum(distance) as total_distance by host
+| timechart sum(distance) as distance, values(total_distance) as "total distance" by host</query>
+        </search>
+	<option name="charting.axisTitleX.visibility">collapsed</option>
+	<option name="charting.axisTitleY.text">meters</option>
+        <option name="charting.axisY.scale">log</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">connect</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart>
+        <title>Time played</title>
+        <search base="basesearch">
+          <query> search time_played=*
+| sort _time
+| streamstats sum(time_played) as total_time_played by host
+| eval hours=round(time_played/3600,2), total_hours=round(total_time_played/3600,2)
+| timechart sum(hours), max(total_hours) as "total hours" by host</query>
+        </search>
+        <option name="charting.chart">line</option>
+	<option name="charting.axisTitleX.visibility">collapsed</option>
+	<option name="charting.axisTitleY.text">hours</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+</form>

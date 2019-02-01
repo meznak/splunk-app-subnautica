@@ -1,0 +1,4 @@
+<nav search_view="search" color="#197bd0">
+  <view name="search" />
+  <view name="subnautica_stats" default="true" />
+</nav>
