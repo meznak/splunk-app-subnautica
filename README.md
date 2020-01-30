@@ -10,4 +10,8 @@ Inputs, field extractions, and dashboards for Subnautica
 
 Install the app:
 
-This app must be installed on forwarders and indexers.
+This app must be installed on forwarders, indexers, and search heads.
+
+Configure the app:
+
+If you have a non-standard Steam Library location, you'll need to adjust the monitor stanza.
